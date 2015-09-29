@@ -1,0 +1,197 @@
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6
+{
+  margin: 0;
+  font-size: 1rem;
+}
+
+input[type="number"] {
+  text-align: right;
+}
+
+h1 {
+ font-size: 2rem;
+ font-weight: bold;
+}
+
+/**
+ * for Fertile Forest
+ */
+.ff-layout-frame {
+  display: -webkit-flex;
+  display: flex;
+  margin-bottom: 500px;
+}
+
+/**
+ * .ff-interactive-pane
+ * .ff-tree-data-pane
+ */
+.ff-tree-data-pane {
+  -webkit-flex: 1;
+  flex: 1;
+}
+
+.ff-tree-data-pane:empty
+{
+  padding: 5rem;
+  text-align: center;
+}
+
+.ff-tree-data-pane:empty::after {
+  content: "8^-^8";
+  color: #ccc;
+}
+
+/**
+ * Result box.
+ */
+.ff-result-box {
+  margin: 1rem;
+  padding: .5rem 1rem;
+  background: #ccf;
+}
+
+.ff-result-box:empty::after {
+  content: "8^-^8";
+  color: #888;
+}
+
+/**
+ * Add Root Node Form Box.
+ */
+.ff-input-box {
+  margin: 1rem;
+  padding: .5rem 1rem;
+  border: 1px solid #000;
+}
+
+.ff-input-box form label {
+  width: 6em;
+  display: inline-block;
+}
+
+.ff-input-box form input {
+  margin: 3px;
+}
+
+.ff-input-box input[type="text"],
+.ff-input-box input[type="number"] {
+    width: 50%;
+    display: inline-block;
+}
+
+.ff-input-box form .submit {
+  margin-top: .5rem;
+  text-align: center;
+}
+
+.ff-grove-box {
+  padding: .5rem;
+}
+
+/**
+ * Node box design.
+ */
+.ff-node-box {
+  padding: .25rem;
+  border: 1px solid #000;
+  margin: 1px;
+}
+
+.ff-node-box:hover {
+}
+
+/**
+ * Root node.
+ */
+.ff-root-node {
+  background: #dce47e;
+}
+
+/**
+ * highlight command target node.
+ */
+.ff-highlight-node {
+  background: #ccf;
+}
+
+.ff-node-box-wrap-label {
+  display: -webkit-flex;
+  display: flex;
+
+  font-size: 1rem;
+}
+
+.ff-node-box form,
+.ff-node-box .ff-node-box-commands
+{
+  display: none;
+}
+
+.ff-node-box:hover form,
+.ff-node-box:hover .ff-node-box-commands
+{
+  display: block;
+}
+
+.ff-node-box form label {
+  display: inline-block;
+  margin: 0 .5rem;
+}
+
+.ff-node-box form input {
+  margin: .5rem;
+  display: inline-block;
+  width: auto;
+}
+
+.ff-node-box-form-layout {
+  display: -webkit-flex;
+  display:         flex;
+
+  -webkit-align-items: center;
+          align-items: center;
+}
+
+.ff-node-box-commands {
+  padding: .5rem 1rem;
+  text-align: right;
+  display: table-cell;
+}
+
+.ff-node-box-commands > h2 {
+  display: inline-block;
+  border: 1px solid #333;
+  padding: .5rem 1rem;
+}
+
+.ff-node-box-commands a {
+  text-decoration: underline;
+  margin: 0 .5rem;
+}
+
+.ff-node-box-commands > .ff-node-box-commands-links {
+  display: none;
+  position: absolute;
+  right: 2rem;
+
+  text-align: left;
+  width: 400px;
+  background: rgba(0, 0, 0, .8);
+  padding: 1rem;
+}
+
+h2:hover ~ .ff-node-box-commands-links,
+.ff-node-box-commands-links:hover
+{
+  display: inline-block;
+}

@@ -1,0 +1,19 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// +--------------------------------------------------------------------------------------------+ //
+// Fertile Forest Version
+//
+// Holds a static string representing the current version of Fertile Forest
+//
+// Fertile Forest : The model for storing hierarchical data in a database.
+// Copyright (c) 2015 Stew Eucen (http://lab.kochlein.com)
+//
+// Licensed under The MIT License
+// Redistributions of files must retain the above copyright notice.
+//
+// @copyright     Copyright (c) 2015 Stew Eucen
+// @link          http://lab.kochlein.com/FertileForest
+// @since         v 1.0.0
+// @license       http://www.opensource.org/licenses/mit-license.php MIT License
+// +--------------------------------------------------------------------------------------------+ //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+1.0.0
