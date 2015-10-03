@@ -12,7 +12,8 @@
       }
     ],
     "require": {
-        "php": ">=5.6.3"
+        "php": ">=5.6.3",
+        "casephp/cakephp": ">=3.1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
