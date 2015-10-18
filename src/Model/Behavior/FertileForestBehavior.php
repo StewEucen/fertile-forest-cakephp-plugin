@@ -1357,10 +1357,74 @@ class FertileForestBehavior extends Behavior
    * @param Entity|int $baseObj Base node|id to find.
    * @param array      $fields  Fields for SELECT clause.
    * @return Query|null Basic query for finding sibling nodes.
+   * @version 1.1.0 Update to one query style.
    */
   public function siblings($baseObj, $fields = null) {
-    $parentNode = $this->genitor($baseObj, $this->_fieldsScope());
-    return $this->children($parentNode, $fields);
+    $baseNode = $this->_resolveNodes($baseObj);
+    if (empty($baseNode)) {
+      return null;
+    }
+
+    $aimGrove = $baseNode->{$this->_grove};
+    $aimDepth = $baseNode->{$this->_depth};
+    $aimQueue = $baseNode->{$this->_queue};
+
+    if ($aimDepth == self::ROOT_DEPTH) {
+      return null;
+    }
+
+    // create subquery to find queues of ancestor
+    $aimQuery = $this->_table->find();
+    $beforeNodesSubquery = $aimQuery
+      ->select(['head_queue' => $aimQuery->newExpr("MAX({$this->_queue}) + 1")])
+      ->where($this->_conditionsScope(
+        $aimGrove,
+        [
+          "{$this->_queue} <" => $aimQueue,
+          "{$this->_depth} <" => $aimDepth,
+        ]
+      ))
+    ;
+
+    $aimQuery = $this->_table->find();
+    $afterNodesSubquery = $aimQuery
+      ->select(['tail_queue' => $aimQuery->newExpr("MIN({$this->_queue}) - 1")])
+      ->where($this->_conditionsScope(
+        $aimGrove,
+        [
+          "{$this->_queue} >" => $aimQueue,
+          "{$this->_depth} <" => $aimDepth,
+        ]
+      ))
+    ;
+
+    // find nodes by ancestor queues
+    {
+      $resConditions = $this->_conditionsScope(
+        $aimGrove,
+        [
+          "{$this->_depth}" => $aimDepth,
+          "{$this->_queue} >=" => $this->_table->query()->func()
+                                    ->coalesce(
+                                      [$beforeNodesSubquery, 0],
+                                      ['literal', 'integer']
+                                    ),
+          "{$this->_queue} <=" => $this->_table->query()->func()
+                                    ->coalesce(
+                                      [$afterNodesSubquery, self::QUEUE_MAX_VALUE],
+                                      ['literal', 'integer']
+                                    ),
+        ]
+      );
+
+      $resOrder = $this->_orderScope();
+    }
+
+    return $this->_table->find()
+      ->select($this->_fieldsScope($fields))
+      ->where($resConditions)
+      ->order($resOrder)
+    ;
   }
 
   /**
