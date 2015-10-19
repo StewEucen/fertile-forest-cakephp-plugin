@@ -106,13 +106,21 @@ class DemosController extends AppController
         case 'ancestors':
         case 'children':
         case 'descendants':
+
         case 'siblings':
+        case 'cousins':
         case 'leaves':
         case 'internals':
         case 'grandchildren':
             $res = $this->{$modelName}->{$subCommand}($p1);
             $views[$subCommand] = empty($res) ? [] : $res;
             $views['params'] = "{$subCommand}({$p1})";
+            break;
+
+        case 'kinships':
+            $res = $this->{$modelName}->{$subCommand}($p1, $p2);
+            $views[$subCommand] = empty($res) ? [] : $res;
+            $views['params'] = "{$subCommand}({$p1}, {$p2})";
             break;
 
         case 'nthChild':

@@ -53,6 +53,9 @@ class FertileForestBehavior extends Behavior
   const SUBTREE_DESCENDANTS_ONLY = false;
   const SUBTREE_WITH_TOP_NODE    = true;
 
+  const KINSHIPS_AS_SIBLINGS = 0;    // Distance for finding sibling nodes In kinships().
+  const KINSHIPS_AS_COUSINS  = 1;    // Distance for finding cousin nodes In kinships().
+
   // recommended queue interval for sprouting node
   const QUEUE_DEFAULT_INTERVAL  = 0x8000;
   const QUEUE_MAX_VALUE         = 0x7fffffff;   // 2147483647
@@ -171,7 +174,11 @@ class FertileForestBehavior extends Behavior
       'subtree'     => 'subtree',
       'descendants' => 'descendants',
       'children'    => 'children',
+
+      'kinships'    => 'kinships',
       'siblings'    => 'siblings',
+      'cousins'     => 'cousins',
+      
       'nthChild'    => 'nthChild',
       'leaves'      => 'leaves',
       'internals'   => 'internals',
@@ -1351,15 +1358,16 @@ class FertileForestBehavior extends Behavior
     ;
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+
   /**
-   * Find sibling nodes from base node.
-   *
+   * Find any kind of kinship from base node.
    * @param Entity|int $baseObj Base node|id to find.
-   * @param array      $fields  Fields for SELECT clause.
-   * @return Query|null Basic query for finding sibling nodes.
-   * @version 1.1.0 Update to one query style.
+   * @param int        $distance Distance from base nodes.
+   * @return Query|null Basic query for finding kinship nodes.
+   * @since 1.1.0
    */
-  public function siblings($baseObj, $fields = null) {
+  public function kinships($baseObj, $distance = self::KINSHIPS_AS_SIBLINGS, $fields = null) {
     $baseNode = $this->_resolveNodes($baseObj);
     if (empty($baseNode)) {
       return null;
@@ -1369,7 +1377,10 @@ class FertileForestBehavior extends Behavior
     $aimDepth = $baseNode->{$this->_depth};
     $aimQueue = $baseNode->{$this->_queue};
 
-    if ($aimDepth == self::ROOT_DEPTH) {
+    $topDepth = $aimDepth - $distance;
+
+    // Impossible to find.
+    if ($topDepth <= self::ROOT_DEPTH) {
       return null;
     }
 
@@ -1381,7 +1392,7 @@ class FertileForestBehavior extends Behavior
         $aimGrove,
         [
           "{$this->_queue} <" => $aimQueue,
-          "{$this->_depth} <" => $aimDepth,
+          "{$this->_depth} <" => $topDepth,
         ]
       ))
     ;
@@ -1393,7 +1404,7 @@ class FertileForestBehavior extends Behavior
         $aimGrove,
         [
           "{$this->_queue} >" => $aimQueue,
-          "{$this->_depth} <" => $aimDepth,
+          "{$this->_depth} <" => $topDepth,
         ]
       ))
     ;
@@ -1403,6 +1414,7 @@ class FertileForestBehavior extends Behavior
       $resConditions = $this->_conditionsScope(
         $aimGrove,
         [
+          // same depth with base node.
           "{$this->_depth}" => $aimDepth,
           "{$this->_queue} >=" => $this->_table->query()->func()
                                     ->coalesce(
@@ -1425,6 +1437,30 @@ class FertileForestBehavior extends Behavior
       ->where($resConditions)
       ->order($resOrder)
     ;
+  }
+
+  /**
+   * Find sibling nodes from base node.
+   *
+   * @param Entity|int $baseObj Base node|id to find.
+   * @param array      $fields  Fields for SELECT clause.
+   * @return Query|null Basic query for finding sibling nodes.
+   * @version 1.1.0 Replace with one query style.
+   */
+  public function siblings($baseObj, $fields = null) {
+    return $this->kinships($baseObj, self::KINSHIPS_AS_SIBLINGS, $fields);
+  }
+
+  /**
+   * Find any kind of cousin nodes from base node.
+   * Note: Results includes siblngs nodes.
+   * @param Entity|int $baseObj Base node|id to find.
+   * @param int        $distance Distance from base nodes.
+   * @return Query|null Basic query for finding cousin nodes.
+   * @since 1.1.0
+   */
+  public function cousins($baseObj, $fields = null) {
+    return $this->kinships($baseObj, self::KINSHIPS_AS_COUSINS, $fields);
   }
 
   /**

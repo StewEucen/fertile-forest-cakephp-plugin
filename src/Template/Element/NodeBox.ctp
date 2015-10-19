@@ -61,10 +61,15 @@
       <hr>
       <a href="?command=children&amp;p1=<?= $id ?>">children</a>
       <a href="?command=descendants&amp;p1=<?= $id ?>">descendants</a>
-      <a href="?command=leaves&amp;p1=<?= $id ?>">leaves</a>
-      <a href="?command=siblings&amp;p1=<?= $id ?>">siblings</a>
-      <a href="?command=nthChild&amp;p1=<?= $id ?>&amp;p2=0">nthChild</a>
       <a href="?command=grandchildren&amp;p1=<?= $id ?>">grandchildren</a>
+      <a href="?command=nthChild&amp;p1=<?= $id ?>&amp;p2=0">nthChild</a>
+
+      <hr>
+      <a href="?command=kinships&amp;p1=<?= $id ?>&amp;p2=0">kinships</a>
+      <a href="?command=siblings&amp;p1=<?= $id ?>">siblings</a>
+      <a href="?command=cousins&amp;p1=<?= $id ?>">cousins</a>
+      <a href="?command=leaves&amp;p1=<?= $id ?>">leaves</a>
+      <a href="?command=internals&amp;p1=<?= $id ?>">internals</a>
       <hr>
       <a href="?command=isRoot&amp;p1=<?= $id ?>">isRoot</a>
       <a href="?command=hasDescendant&amp;p1=<?= $id ?>">hasDescendant</a>
