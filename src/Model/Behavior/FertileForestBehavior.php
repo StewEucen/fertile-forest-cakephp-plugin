@@ -144,7 +144,7 @@ class FertileForestBehavior extends Behavior
       'moveTo' => 'moveTo',
       'moveBy' => 'moveBy',
 
-      'normalize'   => 'normalize',
+      'normalizeQueue' => 'normalizeQueue',
       'normalizeDepth' => 'normalizeDepth',
 
       // boolean methods
@@ -178,7 +178,7 @@ class FertileForestBehavior extends Behavior
       'kinships'    => 'kinships',
       'siblings'    => 'siblings',
       'cousins'     => 'cousins',
-      
+
       'nthChild'    => 'nthChild',
       'leaves'      => 'leaves',
       'internals'   => 'internals',
@@ -208,6 +208,7 @@ class FertileForestBehavior extends Behavior
       'externals'   => 'leaves',
       'terminals'   => 'leaves',
       'parent'      => 'genitor',
+      'normalize'   => 'normalizeQueue',    // deprecated from v1.1.0
     ],
 
     'implementedFinders' => [
@@ -2735,9 +2736,9 @@ class FertileForestBehavior extends Behavior
    * @param Entity|int $aimNode Start node.
    * @param Entity|int $aimBoundaryNode Boundary node.
    * @return boolean true:Success|false:Failure.
-   * @todo Normalize depth, too.
+   * @version 1.1.0 Renamed.
    */
-  public function normalize($aimNode, $aimBoundaryNode) {
+  public function normalizeQueue($aimNode, $aimBoundaryNode) {
     return $this->_transactionWrapper(function() use($aimNode, $aimBoundaryNode) {
       $aimNode         = $this->_resolveNodes($aimNode        , true);  // can be null
       $aimBoundaryNode = $this->_resolveNodes($aimBoundaryNode, true);  // can be null
