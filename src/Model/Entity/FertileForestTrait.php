@@ -181,8 +181,12 @@ trait FertileForestTrait {
       return $this->_getTable()->grandchildren($this, $fields);
     }
 
-    public function kinships($distance = FertileForestBehavior::KINSHIPS_AS_SIBLINGS, $fields = null) {
-      return $this->_getTable()->kinships($this, $distance, $fields);
+    public function kinships(
+      $nextBranch = FertileForestBehavior::KINSHIPS_AS_SIBLING,
+      $levelOffset = FertileForestBehavior::KINSHIPS_SAME_LEVEL,
+      $fields = null
+    ) {
+      return $this->_getTable()->kinships($this, $nextBranch, $levelOffset, $fields);
     }
 
     public function siblings($fields = null) {
@@ -191,6 +195,22 @@ trait FertileForestTrait {
 
     public function cousins($fields = null) {
       return $this->_getTable()->cousins($this, $fields);
+    }
+
+    public function piblings($fields = null) {
+      return $this->_getTable()->piblings($this, $fields);
+    }
+
+    public function aunts($fields = null) {
+      return $this->_getTable()->aunts($this, $fields);
+    }
+
+    public function uncles($fields = null) {
+      return $this->_getTable()->uncles($this, $fields);
+    }
+
+    public function niblings($fields = null) {
+      return $this->_getTable()->niblings($this, $fields);
     }
 
     public function nthSibling($nth = 0, $fields = null) {

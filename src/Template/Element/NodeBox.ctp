@@ -65,9 +65,12 @@
       <a href="?command=nthChild&amp;p1=<?= $id ?>&amp;p2=0">nthChild</a>
 
       <hr>
-      <a href="?command=kinships&amp;p1=<?= $id ?>&amp;p2=0">kinships</a>
+      <a href="?command=kinships&amp;p1=<?= $id ?>&amp;p2=0&amp;p3=0">kinships</a>
       <a href="?command=siblings&amp;p1=<?= $id ?>">siblings</a>
       <a href="?command=cousins&amp;p1=<?= $id ?>">cousins</a>
+      <a href="?command=niblings&amp;p1=<?= $id ?>">niblings</a>
+      <a href="?command=piblings&amp;p1=<?= $id ?>">piblings(aunts/uncles)</a>
+      <hr>
       <a href="?command=leaves&amp;p1=<?= $id ?>">leaves</a>
       <a href="?command=internals&amp;p1=<?= $id ?>">internals</a>
       <hr>
