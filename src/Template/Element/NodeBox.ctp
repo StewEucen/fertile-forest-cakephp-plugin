@@ -58,6 +58,7 @@
       <a href="?command=root&amp;p1=<?= $id ?>">root</a>
       <a href="?command=genitor&amp;p1=<?= $id ?>">genitor</a>
       <a href="?command=grandparent&amp;p1=<?= $id ?>">grandparent</a>
+      <a href="?command=cenancestors&amp;p1[]=<?= $id ?>">cenancestors</a>
       <hr>
       <a href="?command=children&amp;p1=<?= $id ?>">children</a>
       <a href="?command=descendants&amp;p1=<?= $id ?>">descendants</a>

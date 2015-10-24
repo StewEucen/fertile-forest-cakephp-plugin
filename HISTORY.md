@@ -1,3 +1,7 @@
+# v1.2.0
+
+Add cenancestors().
+
 # v1.1.0
 
 Add four new methods to find.

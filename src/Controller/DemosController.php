@@ -126,6 +126,12 @@ class DemosController extends AppController
             $views['params'] = "{$subCommand}({$p1}, {$p2}, {$p3})";
             break;
 
+        case 'cenancestors':
+            $res = $this->{$modelName}->{$subCommand}($p1);
+            $views[$subCommand] = empty($res) ? [] : $res;
+            $views['params'] = "{$subCommand}(" . join(',', $p1) . ")";
+            break;
+
         case 'nthChild':
         case 'offsetSibling':
         case 'nthSibling':

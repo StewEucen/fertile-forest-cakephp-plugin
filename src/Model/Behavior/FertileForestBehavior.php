@@ -173,6 +173,7 @@ class FertileForestBehavior extends Behavior
       'genitor'     => 'genitor',
       'root'        => 'root',
       'grandparent' => 'grandparent',
+      'cenancestors' => 'cenancestors',
 
       // To find descendants.
       'subtree'     => 'subtree',
@@ -1198,6 +1199,98 @@ class FertileForestBehavior extends Behavior
     }
 
     return $trunkQuery->first();
+  }
+
+  /**
+   * Find cenancestor nodes from given nodes.
+   * @param array      $objects Array of given nodes|ids to find.
+   * @param array      $fields  Fields for SELECT clause.
+   * @return Query|null Basic query for finding cenancestor nodes.
+   * @since 1.2.0
+   */
+  public function cenancestors($objects, $fields = null) {
+    $givenNodes = $this->_resolveNodes($objects);
+    if (empty($givenNodes)) {
+      return null;
+    }
+
+    // if bases include null, can not find.
+    if (in_array(null, $givenNodes)) {
+      return null;
+    }
+
+    // check same grove.
+    if ($this->_hasGrove) {
+      $groves = array_map(function($n) {return $n->{$this->_grove};}, $givenNodes);
+      if (min($groves) != max($groves)) {
+        return null;
+      }
+    }
+
+    $eldistNode = reset($givenNodes);
+    {
+      $aimGrove = $eldistNode->{$this->_grove};
+    }
+
+    $queues = array_map(function($n) {return $n->{$this->_queue};}, $givenNodes);
+    {
+      $headQueue = min($queues);
+      $tailQueue = max($queues);
+    }
+
+    // create subquery to find top-depth in range of head-tail.
+    $conditions = $this->_conditionsScope(
+      $aimGrove,
+      [
+        "{$this->_queue} >=" => $headQueue,
+        "{$this->_queue} <=" => $tailQueue,
+      ]
+    );
+
+    $aimQuery = $this->_table->find();
+    $topDepthSubquery = $aimQuery
+      ->select(['top_depth' => $aimQuery->func()->min($this->_depth)])
+      ->where($conditions)
+    ;
+
+    // create subquery to find queues of ancestors.
+    {
+      $conditions = $this->_conditionsScope(
+        $aimGrove,
+        [
+          "{$this->_queue} <" => $headQueue,
+          "{$this->_depth} <" => $topDepthSubquery,
+        ]
+      );
+
+      $group = [$this->_depth];
+      if ($this->_hasGrove) {
+        array_unshift($group, $this->_grove);
+      }
+    }
+
+    $aimQuery = $this->_table->find();
+    $cenancestorNodesSubquery = $aimQuery
+      ->select(['ancestor_queue' => $aimQuery->func()->max($this->_queue)])
+      ->where($conditions)
+      ->group($group)
+    ;
+
+    // find nodes by ancestor queues
+    {
+      $resConditions = $this->_conditionsScope(
+        $aimGrove,
+        ["{$this->_queue} IN" => $cenancestorNodesSubquery]
+      );
+
+      $resOrder = $this->_orderScope();
+    }
+
+    return $this->_table->find()
+      ->select($this->_fieldsScope($fields))
+      ->where($resConditions)
+      ->order($resOrder)
+    ;
   }
 
   /**
