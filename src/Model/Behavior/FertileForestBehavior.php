@@ -100,6 +100,8 @@ class FertileForestBehavior extends Behavior
       'depth' => 'ff_depth',  // default field name of depth
       'queue' => 'ff_queue',  // default field name of queue
 
+      'branch_level' => 'ff_branch_level',
+
       'softDelete'  => 'deleted',   // default field name of soft delete
       'enableValue' => 0,           // enable value of soft delete
       'deleteValue' => 1,           // deleted value of soft delete
@@ -268,6 +270,7 @@ class FertileForestBehavior extends Behavior
       'depth',
       'grove',
       'softDelete',
+      'branch_level',
     ];
     foreach ($keys as $key) {
       $this->{"_{$key}"} = $this->_getConfig($key);
@@ -1545,8 +1548,78 @@ class FertileForestBehavior extends Behavior
       $resOrder = $this->_orderScope();
     }
 
+    {
+      $incrementForSiblingsQuery = $this->_table->find();
+      $incrementBranchLevelCase = $incrementForSiblingsQuery->newExpr()->addCase(
+        [
+          $incrementForSiblingsQuery->newExpr()->add([
+            "{$this->_queue} <>" => $aimQueue
+          ]),
+        ],
+        [1, 0],
+        ['integer', 'integer']
+      );
+
+      $branchFarLevelSubqueries = [$incrementBranchLevelCase];
+      for ($d = $topDepth + 1; $d < $aimDepth; ++$d) {
+        $aimSubQuery = $this->_table->find();
+        $beforeNodesBranchFarLevelSubquery = $aimSubQuery
+          ->select(['head_queue_' . $d => $aimQuery->func()->max($this->_queue)])
+          ->where($this->_conditionsScope(
+            $aimGrove,
+            [
+              "{$this->_queue} <" => $aimQueue,
+              "{$this->_depth} <=" => $d,
+            ]
+          ))
+        ;
+
+        $aimSubQuery = $this->_table->find();
+        $afterNodesBranchFarLevelSubquery = $aimSubQuery
+          ->select(['tail_queue_' . $d => $aimSubQuery->newExpr("MIN({$this->_queue}) - 1")])
+          ->where($this->_conditionsScope(
+            $aimGrove,
+            [
+              "{$this->_queue} >" => $aimQueue,
+              "{$this->_depth} <=" => $d,
+            ]
+          ))
+        ;
+
+        $branchFarLevelSubqueries[] = $aimSubQuery->newExpr()->addCase(
+          [
+            $aimSubQuery->newExpr()->add([
+              "{$this->_queue} <" => $this->_table->query()->func()
+                ->coalesce(
+                  [$beforeNodesBranchFarLevelSubquery, 0],
+                  ['literal', 'integer']
+                )
+            ]),
+            $aimSubQuery->newExpr()->add([
+              "{$this->_queue} >" => $this->_table->query()->func()
+                ->coalesce(
+                  [$afterNodesBranchFarLevelSubquery, self::QUEUE_MAX_VALUE],
+                  ['literal', 'integer']
+                )
+            ]),
+          ],
+          [1, 1, 0],
+          ['integer', 'integer', 'integer']
+        );
+      }
+
+      $baseFields = $this->_fieldsScope($fields);
+      {
+        $baseFields[$this->_branch_level] = $this->_table->find()
+            ->newExpr()
+            ->add($branchFarLevelSubqueries)
+            ->type('+')
+        ;
+      }
+    }
+
     return $this->_table->find()
-      ->select($this->_fieldsScope($fields))
+      ->select($baseFields)
       ->where($resConditions)
       ->order($resOrder)
     ;
