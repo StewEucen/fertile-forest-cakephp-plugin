@@ -1,3 +1,16 @@
+# v1.3.0
+
+Add column of ff_branch_level in kinships() and wrapper methods of kinships().
+- kinships()
+- siblings()
+- cousins()
+- niblings()
+- piblings()
+
+Update const for params of kinships(). The method is not compatible with previous versions.
+
+Update kinships() to check params.
+
 # v1.2.0
 
 Add cenancestors().
