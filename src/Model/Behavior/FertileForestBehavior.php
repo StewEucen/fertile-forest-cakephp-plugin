@@ -53,12 +53,13 @@ class FertileForestBehavior extends Behavior
   const SUBTREE_DESCENDANTS_ONLY = false;
   const SUBTREE_WITH_TOP_NODE    = true;
 
-  const KINSHIPS_AS_SIBLING = 0;    // Distance for finding sibling nodes In kinships().
-  const KINSHIPS_AS_COUSIN  = 1;    // Distance for finding cousin nodes In kinships().
+  // Branch level means distance for finding sibling nodes and their subtree in kinships().
+  const KINSHIPS_BRANCH_LEVEL_ONE = 1;  // for siblings and their descencants.
+  const KINSHIPS_BRANCH_LEVEL_TWO = 2;  // for piblings and their descencants.
 
-  const KINSHIPS_SAME_LEVEL   = 0;   // Same level to find kinships. (such as siblings, cousins.)
-  const KINSHIPS_PARENT_LEVEL = -1;   // Upper level to find kinships. (such as aunts|uncles)
-  const KINSHIPS_CHILD_LEVEL  = 1;   // Lower level to find kinships. (such as niblings.)
+  const KINSHIPS_SAME_DEPTH   = 0;   // Same depth to find kinships. (such as siblings, cousins.)
+  const KINSHIPS_PARENT_DEPTH = -1;  // Upper depth to find kinships. (such as aunts|uncles)
+  const KINSHIPS_CHILD_DEPTH  = 1;   // Lower depth to find kinships. (such as niblings.)
 
   // recommended queue interval for sprouting node
   const QUEUE_DEFAULT_INTERVAL  = 0x8000;
@@ -1469,15 +1470,15 @@ class FertileForestBehavior extends Behavior
   /**
    * Find any kind of kinship from base node.
    * @param Entity|int $baseObj Base node|id to find.
-   * @param int        $nextBranch Branch distance of finding nodes from base nodes.
-   * @param int        $levelOffset Offset of kinship level of finding nodes from base nodes.
+   * @param int        $branchLevel Branch distance of finding nodes from base nodes.
+   * @param int        $depthOffset Offset of kinship level of finding nodes from base nodes.
    * @return Query|null Basic query for finding kinship nodes.
    * @since 1.1.0
    */
   public function kinships(
     $baseObj,
-    $nextBranch = self::KINSHIPS_AS_SIBLING,
-    $levelOffset = self::KINSHIPS_SAME_LEVEL,
+    $branchLevel = self::KINSHIPS_BRANCH_LEVEL_ONE,
+    $depthOffset = self::KINSHIPS_SAME_DEPTH,
     $fields = null
   ) {
     $baseNode = $this->_resolveNodes($baseObj);
@@ -1489,7 +1490,7 @@ class FertileForestBehavior extends Behavior
     $aimDepth = $baseNode->{$this->_depth};
     $aimQueue = $baseNode->{$this->_queue};
 
-    $topDepth = $aimDepth - $nextBranch;
+    $topDepth = $aimDepth - $branchLevel;
 
     // Impossible to find.
     if ($topDepth < self::ROOT_DEPTH) {
@@ -1504,7 +1505,7 @@ class FertileForestBehavior extends Behavior
         $aimGrove,
         [
           "{$this->_queue} <" => $aimQueue,
-          "{$this->_depth} <" => $topDepth,
+          "{$this->_depth} <=" => $topDepth,
         ]
       ))
     ;
@@ -1516,7 +1517,7 @@ class FertileForestBehavior extends Behavior
         $aimGrove,
         [
           "{$this->_queue} >" => $aimQueue,
-          "{$this->_depth} <" => $topDepth,
+          "{$this->_depth} <=" => $topDepth,
         ]
       ))
     ;
@@ -1527,7 +1528,7 @@ class FertileForestBehavior extends Behavior
         $aimGrove,
         [
           // same depth with base node.
-          "{$this->_depth}" => $aimDepth + $levelOffset,
+          "{$this->_depth}" => $aimDepth + $depthOffset,
           "{$this->_queue} >=" => $this->_table->query()->func()
                                     ->coalesce(
                                       [$beforeNodesSubquery, 0],
@@ -1560,7 +1561,7 @@ class FertileForestBehavior extends Behavior
    * @version 1.1.0 Replace with one query style.
    */
   public function siblings($baseObj, $fields = null) {
-    return $this->kinships($baseObj, self::KINSHIPS_AS_SIBLING, self::KINSHIPS_SAME_LEVEL, $fields);
+    return $this->kinships($baseObj, self::KINSHIPS_BRANCH_LEVEL_ONE, self::KINSHIPS_SAME_DEPTH, $fields);
   }
 
   /**
@@ -1572,7 +1573,7 @@ class FertileForestBehavior extends Behavior
    * @since 1.1.0
    */
   public function cousins($baseObj, $fields = null) {
-    return $this->kinships($baseObj, self::KINSHIPS_AS_COUSIN, self::KINSHIPS_SAME_LEVEL, $fields);
+    return $this->kinships($baseObj, self::KINSHIPS_BRANCH_LEVEL_TWO, self::KINSHIPS_SAME_DEPTH, $fields);
   }
 
   /**
@@ -1584,7 +1585,7 @@ class FertileForestBehavior extends Behavior
    * @since 1.1.0
    */
   public function piblings($baseObj, $fields = null) {
-    return $this->kinships($baseObj, self::KINSHIPS_AS_COUSIN, self::KINSHIPS_PARENT_LEVEL, $fields);
+    return $this->kinships($baseObj, self::KINSHIPS_BRANCH_LEVEL_TWO, self::KINSHIPS_PARENT_DEPTH, $fields);
   }
 
   /**
@@ -1596,7 +1597,7 @@ class FertileForestBehavior extends Behavior
    * @since 1.1.0
    */
   public function niblings($baseObj, $fields = null) {
-    return $this->kinships($baseObj, self::KINSHIPS_AS_SIBLING, self::KINSHIPS_CHILD_LEVEL, $fields);
+    return $this->kinships($baseObj, self::KINSHIPS_BRANCH_LEVEL_ONE, self::KINSHIPS_CHILD_DEPTH, $fields);
   }
 
   /**
