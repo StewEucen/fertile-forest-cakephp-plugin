@@ -1500,6 +1500,10 @@ class FertileForestBehavior extends Behavior
       return null;
     }
 
+    if ($branchLevel + $depthOffset < 0) {
+      return null;
+    }
+
     // create subquery to find queues of ancestor
     $aimQuery = $this->_table->find();
     $beforeNodesSubquery = $aimQuery
